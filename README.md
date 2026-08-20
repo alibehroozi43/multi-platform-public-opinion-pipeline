@@ -236,32 +236,32 @@ The Docker stack also includes Grafana image rendering for dashboard export and 
 ## Repository Structure
 
 ```text
-media-sentiment-pipeline/
-│
-├── config/                  # Topic, schema and pipeline configuration
-├── data/                    # Data processing directories
-├── docs/                    # Methodology and technical documentation
-├── monitoring/
-│   ├── grafana/             # Dashboards and provisioning
-│   ├── static/              # Control-center frontend assets
-│   ├── templates/           # Web interface templates
-│   ├── victoriametrics/     # Metrics scraping configuration
-│   ├── control_center.py
-│   ├── pipeline_metrics.py
-│   ├── runtime_wrapper.py
-│   └── docker-compose.yml
-│
-├── notebooks/               # Analytical notebooks
-├── outputs/                 # Generated analytical outputs
-├── reports/                 # Reports and validation results
-├── scripts/                 # Utility / execution scripts
-└── src/
-    ├── annotation/          # Annotation and model evaluation
-    ├── cost_tracking/       # Model/API usage analysis
-    ├── ingestion/           # Reddit, X, YouTube and financial ingestion
-    ├── intake/              # Input validation and profiling
-    ├── temporal_analysis/   # Time-based analytical workflows
-    └── validation/          # Quality and evaluation procedures
+multi-platform-public-opinion-pipeline/
+|-- config/                  # Topic, schema, and pipeline configuration
+|-- docs/                    # Methodology and technical documentation
+|-- monitoring/              # Control Center, dashboards, and Docker services
+|   |-- grafana/             # Dashboards and provisioning
+|   |-- static/              # Control Center frontend assets
+|   |-- templates/           # Web interface templates
+|   `-- victoriametrics/     # Metrics scraping configuration
+|-- notebooks/               # Analytical notebooks
+|-- reports/                 # Report directory placeholder
+|-- scripts/                 # Utility and execution scripts
+|-- src/
+|   |-- annotation/          # Annotation and model evaluation
+|   |-- common/              # Shared JSONL utilities
+|   |-- cost_tracking/       # Model/API usage analysis
+|   |-- event_analysis/      # Event-study workflows
+|   |-- ingestion/           # Reddit, X, YouTube, and financial ingestion
+|   |-- intake/              # Input validation and profiling
+|   |-- preprocessing/       # Cleaning, eligibility, and relevance workflows
+|   |-- reporting/           # Dashboard-report generation
+|   |-- temporal_analysis/   # Time-based analytical workflows
+|   `-- validation/          # Quality and evaluation procedures
+|-- .env.example             # Safe environment-variable template
+|-- ATTRIBUTION.md           # Team collaboration credit
+|-- README.md
+`-- requirements.txt
 ```
 
 ---
@@ -282,7 +282,7 @@ My work focused primarily on:
 
 I also worked with the broader system architecture, including the interaction between data ingestion, analytical outputs, monitoring, Docker-based services, and dashboard components.
 
-Other modules in this repository were developed collaboratively by members of the project team. Detailed team attribution is documented in `ATTRIBUTION.md`. This portfolio snapshot intentionally uses a clean Git history and preserves collaboration credit separately from the original repository history.
+Other modules in this repository were developed collaboratively by members of the project team. Detailed team attribution is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md). This portfolio snapshot intentionally uses a clean Git history and preserves collaboration credit separately from the original repository history.
 
 ---
 
@@ -291,8 +291,8 @@ Other modules in this repository were developed collaboratively by members of th
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd media-sentiment-pipeline
+git clone https://github.com/alibehroozi43/multi-platform-public-opinion-pipeline.git
+cd multi-platform-public-opinion-pipeline
 ```
 
 ### 2. Create a Python environment
@@ -363,7 +363,7 @@ Runtime artifacts are intentionally excluded from the portfolio repository, incl
 * Local monitoring databases
 * Python cache files
 
-The public repository should therefore contain source code and reproducible configuration templates rather than local execution state.
+The portfolio repository should therefore contain source code and reproducible configuration templates rather than local execution state.
 
 ---
 
@@ -391,4 +391,4 @@ Data Scientist | Transportation & Mobility Analytics | Machine Learning | Simula
 
 This repository represents collaborative project work.
 
-Individual contributions are documented through Git commit history and project documentation. The portfolio version is intended to demonstrate my technical contributions and experience working within a larger data-science and software-engineering workflow.
+Detailed collaboration credit is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md). This clean portfolio snapshot is intended to demonstrate my technical contributions and experience working within a larger data-science and software-engineering workflow without reproducing the original repository history.
