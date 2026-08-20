@@ -1,40 +1,18 @@
-"""
-user_features.py — per-user (cross-video) bot-risk features for YouTube
-comment/reply records (Parmida).
+"""Compute cross-video automation-risk features for YouTube authors.
 
-This is "Tier B" from docs/cross_platform_alignment_guide_fa.md §4:
-src/ingestion/automation_risk.py ("Tier A") only ever sees one video's
-comments at a time, so it can't tell that the same author repeated the
-exact same text across 40 different videos. This module looks at a single
-author's *entire* history across every video/week already collected, which
-is only possible after extraction — see §4 of that doc for why this can't
-happen before/during collection.
+This post-ingestion stage can detect repeated behavior across videos that the
+per-video collector cannot. YouTube represents replies as a flat
+comment-to-reply structure. Parent-author features such as ``self_reply_ratio``
+and ``unique_parent_authors`` may be unavailable for older records without
+parent linkage.
 
-It implements the shared "core" feature set from
-users_dataframe_variables_explained_fa.md, adapted to the field names
-actually present in YouTube Record JSONL output (config/schema.py) — see
-that file's "chiz-haee ke moshtarekan" table for which of these are
-platform-agnostic and could later be reused for Reddit/X.
+Older records may use raw ``author_channel_id`` when ``author_hash`` is absent;
+that fallback is legacy compatibility data and must be handled as identifiable
+information. Risk weights are heuristics, not estimates trained on labeled bot
+ground truth, and require calibration and cautious interpretation.
 
-Known gaps (documented, not hidden — same spirit as automation_risk.py):
-  - Most data collected so far (data/raw/iran_us_war/youtube_comments_
-    *.jsonl) predates the v2/v3 schema fields, so `content_id`, `parent_id`,
-    and the per-comment `automation_risk_score` (Tier A) are often missing
-    (None) on older records. Anything that needs them degrades gracefully
-    (returns None / skips that signal) instead of raising.
-  - YouTube's reply structure is flat (comment -> reply, one level), so the
-    reference doc's max_depth/avg_depth don't apply here and aren't
-    computed.
-  - self_reply_ratio / unique_parent_authors need `parent_id` to look up the
-    parent's author, which most current data lacks — not implemented yet;
-    revisit once more v2/v3-shaped data exists.
-  - Grouping key is `author_hash` when present, else falls back to the raw
-    `author_channel_id` (older records) — same PII caveat already tracked
-    in docs/project_brief_for_llm.md's v1 remediation TODO.
-
-The final automation_risk_score_user is a heuristic weighted score, not a
-bot verdict — see docs/cross_platform_alignment_guide_fa.md §4 for the
-"how do we pick weights" / "how do we know it's decent" reasoning.
+This module was originally developed by Parmida Mohamadzade as part of the
+collaborative pipeline.
 """
 
 import statistics
@@ -44,16 +22,10 @@ from pathlib import Path
 from typing import Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ingestion"))
-# Reuse, don't reimplement: same text-normalization/timestamp-parsing/URL
-# logic Tier A already uses, so a comment counted as "duplicate text" means
-# the same thing at both tiers.
+# Keep text, timestamp, and URL semantics consistent with content-level scoring.
 from automation_risk import _normalize_text, _parse_ts, _URL_RE  # noqa: E402
 
-# ---- weights for automation_risk_score_user -------------------------------
-# Picked from users_dataframe_variables_explained_fa.md's "most important
-# features for bot detection" list. NOT validated against ground truth
-# (none exists) - a starting point, meant to be tuned after the manual
-# spot-check described in cross_platform_alignment_guide_fa.md §4.
+# Initial heuristic weights; calibrate before treating scores as decision thresholds.
 _WEIGHT_EXACT_DUPLICATE = 0.35
 _WEIGHT_RAPID_ACTIVITY = 0.25
 _WEIGHT_URL_RATIO = 0.15
@@ -71,8 +43,9 @@ def _user_key(record: dict) -> str | None:
 
 
 def build_user_table(records: Iterable[dict]) -> list[dict]:
-    """Group Record-shaped dicts by author and compute the Tier-B feature
-    set. Returns a plain list of dicts (not a DataFrame) so this module
+    """Group records by author and compute cross-video risk features.
+
+    Returns a plain list of dicts so this module
     stays importable without a hard pandas dependency."""
     by_user: dict[str, list[dict]] = defaultdict(list)
     for r in records:

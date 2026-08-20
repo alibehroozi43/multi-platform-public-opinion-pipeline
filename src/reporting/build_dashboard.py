@@ -1,26 +1,8 @@
-"""Build a self-contained HTML dashboard from the pipeline's outputs/tables/*.csv.
+"""Render pipeline tables as a self-contained HTML dashboard.
 
-Usage
------
-    python -m src.reporting.build_dashboard
-    python -m src.reporting.build_dashboard --data-status real --out outputs/dashboard/index.html
-
-This script does NOT talk to any API and does not require the outputs to be
-"final" — it simply reads whatever is currently under ``outputs/tables/`` and
-``outputs/model_evaluation/`` and renders a dashboard from it. That means:
-
-  * Today, with mock/placeholder data flowing through the pipeline, running
-    this script produces a dashboard over the mock numbers (and the
-    dashboard visibly says so — see ``--data-status``).
-  * Once the real collected + annotated data replaces the mock data and the
-    same analysis scripts (src/preprocessing, src/temporal_analysis,
-    src/event_analysis, ...) regenerate outputs/tables/*.csv, re-running this
-    *same* script regenerates the dashboard over the real numbers. Nothing
-    about the dashboard is hand-authored per run.
-
-The output is a single HTML file with the data inlined as JSON and a small
-vanilla-JS chart layer (no external CDN, so it also works opened directly
-from disk with no server / no internet).
+The output embeds data and charts without external services. ``--data-status``
+labels synthetic and real runs so preliminary results cannot be mistaken for
+research findings.
 """
 
 from __future__ import annotations

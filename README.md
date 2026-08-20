@@ -1,394 +1,120 @@
-# Multi-Platform Public Opinion & Sentiment Analysis Pipeline
+# Multi-Platform Public Opinion Pipeline
 
-An end-to-end data engineering, analytics, and observability pipeline for collecting and analysing public discourse across **Reddit, X (Twitter), and YouTube**.
+An end-to-end pipeline for collecting, harmonizing, annotating, and analyzing public discourse from Reddit, X, and YouTube. It combines reproducible research workflows with operational monitoring through a web Control Center, Grafana, VictoriaMetrics, and Docker Compose.
 
-The project combines multi-platform data acquisition, browser automation, data validation, sentiment and relevance analysis, statistical analysis, bot/automation-risk signals, and a monitoring layer with **Grafana, VictoriaMetrics, Docker, and a web-based Control Center**.
+This repository is a portfolio snapshot of a collaborative academic project. Team attribution and the limits of individual ownership are documented in [ATTRIBUTION.md](ATTRIBUTION.md).
 
-> **Portfolio note:** This repository originates from a collaborative academic/team project. This portfolio branch is organised to demonstrate the system architecture, analytical workflow, monitoring stack, and my contributions while preserving team attribution.
-
----
-
-## Project Overview
-
-The pipeline was designed to study large-scale public opinion around a configurable geopolitical topic while maintaining a reproducible workflow from raw collection to analytical outputs.
-
-At a high level, the system covers:
+## Pipeline
 
 ```text
 Reddit / X / YouTube
-        │
-        ▼
-Data Acquisition & Scraping
-        │
-        ▼
-Schema Harmonisation
-        │
-        ▼
-Data Quality & Validation
-        │
-        ├── Relevance Filtering
-        ├── Bot / Automation-Risk Signals
-        └── Geographic / Contextual Enrichment
-        │
-        ▼
-Sentiment / Stance / Emotion Analysis
-        │
-        ▼
-Statistical & Temporal Analysis
-        │
-        ▼
-Monitoring / Control Center
-        │
-        ├── Grafana
-        ├── VictoriaMetrics
-        └── Live Runtime Metrics
+        |
+        v
+Ingestion and incremental collection
+        |
+        v
+Schema harmonization and quality checks
+        |
+        +-- relevance and eligibility
+        +-- author privacy and geographic context
+        +-- bot / automation-risk signals
+        |
+        v
+Sentiment, stance, emotion, and content-type annotation
+        |
+        v
+Temporal, statistical, event, and financial analysis
+        |
+        v
+Reports, dashboards, and runtime monitoring
 ```
 
----
+The ingestion layer handles platform-specific APIs and Selenium-based browser automation while producing shared records. Checkpoints, query registries, provenance fields, and duplicate controls support repeatable incremental runs.
 
-## Key Capabilities
+The analytical workflow includes:
 
-### Multi-Platform Data Acquisition
+- relevance screening and manual audit samples;
+- LLM-assisted annotation with route comparison, caching, cost tracking, and evaluation against reviewed samples;
+- sentiment, stance, emotion, and content-type analysis;
+- descriptive statistics, weekly trends, group comparisons, and sensitivity checks;
+- rule-based automation-risk analysis at content and account level;
+- registered-event studies and financial/economic time-series alignment.
 
-The ingestion layer supports multiple public-data sources:
+Automation-risk scores are review signals, not definitive bot classifications. Event and financial results are treated as temporal associations rather than causal effects.
 
-* **Reddit** — post and comment collection
-* **X / Twitter** — browser-based scraping and query execution
-* **YouTube** — video and comment collection
-* Configurable topic and query registries
-* Incremental collection and duplicate control
-* Shared output schemas across platforms
+## Monitoring and Control Center
 
-### Browser Automation & Scraping
+The `monitoring/` application provides process controls, live logs, read-only data summaries, runtime metrics, and pipeline-integrity checks. Platform-specific Grafana dashboards cover Reddit, X, YouTube, finance, and overall status. VictoriaMetrics stores scraped metrics, and Docker Compose provisions the monitoring services.
 
-The project includes automated collection workflows using tools such as:
+The Control Center applies runtime settings without rewriting the core pipeline configuration where isolation is required. Reddit's two-stage collector is kept sequential because its stages share browser state and handoff files.
 
-* Python
-* Selenium
-* Firefox / GeckoDriver
-* REST APIs where available
-* Configurable queries and source registries
-* Retry and error-handling logic
-* Runtime collection controls
-
----
-
-## Sentiment & Public Opinion Analysis
-
-The analytical layer supports structured annotation and comparison of public discourse.
-
-Analytical dimensions include:
-
-* Sentiment
-* Stance
-* Emotion
-* Content type
-* Relevance
-* Confidence scores
-* Group comparison
-* Sensitivity analysis
-* Temporal analysis
-
-The repository also contains evaluation workflows for comparing model-generated labels against manually reviewed samples.
-
----
-
-## Bot & Automation-Risk Analysis
-
-The pipeline contains mechanisms for identifying suspicious or automated behaviour using account/activity characteristics and rule-based risk signals.
-
-Rather than treating bot detection as a single binary classifier, the workflow supports **automation-risk scoring** and downstream analysis of potentially non-organic activity.
-
----
-
-## Statistical & Analytical Workflow
-
-The project includes reproducible analytical workflows covering:
-
-* Descriptive statistics
-* Group comparisons
-* Hypothesis testing
-* Sensitivity analysis
-* Temporal aggregation
-* Financial/economic data integration
-* Claim validation and analytical audit outputs
-
-Statistical procedures used across the project include methods such as:
-
-* Chi-square tests
-* Fisher's exact test
-* Mann-Whitney tests
-* Welch's t-tests
-
----
-
-## Monitoring & Observability
-
-A dedicated monitoring layer provides visibility into collectors and pipeline execution.
-
-The monitoring architecture includes:
-
-* **Grafana** dashboards
-* **VictoriaMetrics** metrics storage
-* Docker-based monitoring services
-* Runtime collector metrics
-* Live logs
-* Platform-specific dashboards
-* Pipeline integrity checks
-* Process status and execution controls
-
-Dedicated Grafana dashboards are available for:
-
-* Reddit
-* X
-* YouTube
-* Finance
-* Overall pipeline status
-
----
-
-## Control Center
-
-The repository includes a web-based operational Control Center for managing and observing the pipeline.
-
-The interface provides:
-
-* Collector status
-* Read-only data summaries
-* Reddit scraper configuration
-* YouTube collection controls
-* X scraper controls
-* Financial-data controls
-* Live logs
-* Pipeline-integrity validation
-
-Runtime configuration is isolated from the core pipeline logic where possible, allowing the monitoring layer to control execution without rewriting the original source configuration.
-
----
-
-## Docker Monitoring Stack
-
-The monitoring environment is containerised using Docker Compose.
-
-Core services include:
+## Repository Layout
 
 ```text
-Grafana
-   │
-   ▼
-VictoriaMetrics
-   ▲
-   │
-Pipeline Metrics
+config/                 Topic, query, calendar, and schema configuration
+docs/                   Research design, contracts, and operating guidance
+monitoring/             Control Center, dashboards, metrics, and Docker services
+notebooks/              Reproducible analytical workflows
+scripts/                Supporting execution and synthetic-data utilities
+src/annotation/         Annotation, model routing, evaluation, and dataset assembly
+src/cost_tracking/      API usage and run-cost accounting
+src/event_analysis/     Registered-event analysis
+src/ingestion/          Reddit, X, YouTube, and financial ingestion
+src/intake/             Input profiling and quality grading
+src/preprocessing/      Cleaning, eligibility, deduplication, and relevance audit
+src/reporting/          Static analytical dashboard generation
+src/temporal_analysis/  Descriptive, temporal, comparative, and sensitivity analysis
+src/validation/         Agreement and annotation-accuracy evaluation
 ```
 
-The Docker stack also includes Grafana image rendering for dashboard export and reporting.
+Runtime data, local databases, logs, credentials, and generated reports are intentionally excluded from version control.
 
----
+## Setup
 
-## Technology Stack
-
-### Programming & Data
-
-* Python
-* Pandas
-* NumPy
-* SQL
-* JSON / JSONL
-* YAML
-
-### Data Collection
-
-* Selenium
-* Firefox / GeckoDriver
-* REST APIs
-* Web scraping
-
-### Analytics & Machine Learning
-
-* Statistical inference
-* Sentiment analysis
-* Stance analysis
-* LLM-assisted annotation
-* Relevance classification
-* Bot / automation-risk analysis
-* Temporal analysis
-
-### Monitoring & Backend
-
-* Grafana
-* VictoriaMetrics
-* Docker
-* Docker Compose
-* Python-based web control layer
-* Runtime metrics and logging
-
-### Engineering
-
-* Git / GitHub
-* Modular pipeline architecture
-* Environment-based configuration
-* Data validation
-* Reproducible analytical workflows
-
----
-
-## Repository Structure
-
-```text
-multi-platform-public-opinion-pipeline/
-|-- config/                  # Topic, schema, and pipeline configuration
-|-- docs/                    # Methodology and technical documentation
-|-- monitoring/              # Control Center, dashboards, and Docker services
-|   |-- grafana/             # Dashboards and provisioning
-|   |-- static/              # Control Center frontend assets
-|   |-- templates/           # Web interface templates
-|   `-- victoriametrics/     # Metrics scraping configuration
-|-- notebooks/               # Analytical notebooks
-|-- reports/                 # Report directory placeholder
-|-- scripts/                 # Utility and execution scripts
-|-- src/
-|   |-- annotation/          # Annotation and model evaluation
-|   |-- common/              # Shared JSONL utilities
-|   |-- cost_tracking/       # Model/API usage analysis
-|   |-- event_analysis/      # Event-study workflows
-|   |-- ingestion/           # Reddit, X, YouTube, and financial ingestion
-|   |-- intake/              # Input validation and profiling
-|   |-- preprocessing/       # Cleaning, eligibility, and relevance workflows
-|   |-- reporting/           # Dashboard-report generation
-|   |-- temporal_analysis/   # Time-based analytical workflows
-|   `-- validation/          # Quality and evaluation procedures
-|-- .env.example             # Safe environment-variable template
-|-- ATTRIBUTION.md           # Team collaboration credit
-|-- README.md
-`-- requirements.txt
-```
-
----
-
-## My Contributions
-
-This project was developed collaboratively.
-
-My work focused primarily on:
-
-* Financial and economic data integration
-* Statistical analysis and hypothesis testing
-* Temporal and comparative analysis
-* Analytical workflow validation
-* Data-quality and reproducibility checks
-* Integration and testing of pipeline monitoring and observability workflows
-* Technical debugging and operational testing across the end-to-end pipeline
-
-I also worked with the broader system architecture, including the interaction between data ingestion, analytical outputs, monitoring, Docker-based services, and dashboard components.
-
-Other modules in this repository were developed collaboratively by members of the project team. Detailed team attribution is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md). This portfolio snapshot intentionally uses a clean Git history and preserves collaboration credit separately from the original repository history.
-
----
-
-## Running the Project
-
-### 1. Clone the repository
+Requirements vary by collector. Start with the shared environment:
 
 ```bash
 git clone https://github.com/alibehroozi43/multi-platform-public-opinion-pipeline.git
 cd multi-platform-public-opinion-pipeline
-```
-
-### 2. Create a Python environment
-
-```bash
 python -m venv .venv
 ```
 
-Windows:
+Activate the environment and install dependencies:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-
-Copy the provided template:
-
-```bash
-cp .env.example .env
-```
-
-On Windows:
-
-```powershell
 Copy-Item .env.example .env
 ```
 
-Add your own API credentials locally.
+Provide credentials only in the local `.env` file. Do not commit API keys, salts, browser profiles, or raw data. Platform-specific configuration is defined in `config/config.yaml`, `config/query_registry.yaml`, and the environment template.
 
-**Never commit `.env` or API credentials to Git.**
+## Running Monitoring
 
----
-
-## Running the Monitoring Layer
-
-The monitoring environment is located under:
-
-```text
-monitoring/
-```
-
-From that directory:
+From `monitoring/`:
 
 ```bash
 docker compose up -d
 ```
 
-This starts the containerised monitoring services, including Grafana and VictoriaMetrics.
+Windows launchers are available at the repository root and under `monitoring/`. The Control Center and collectors also require their platform dependencies, such as Firefox/GeckoDriver for browser-driven workflows.
 
-The repository also includes Windows launcher scripts for the Control Center and Grafana environment.
+## Research and Data Constraints
 
----
+- Collection covers Reddit, X, and YouTube; schemas retain platform provenance and parent relationships.
+- Stable author identifiers are salted and hashed where available. Raw salts and unnecessary personally identifiable information are not stored in tracked files.
+- Low-sample and partial weeks remain visible in temporal outputs rather than being silently dropped.
+- Annotation failures and missing coverage are reported explicitly.
+- Raw and interim datasets are local artifacts and are not included in this portfolio snapshot.
 
-## Data & Security Notes
+Detailed schema, eligibility, sampling, and analysis decisions are in [docs/README.md](docs/README.md).
 
-Runtime artifacts are intentionally excluded from the portfolio repository, including:
+## Contributions
 
-* Local `.env` files
-* API credentials
-* Runtime logs
-* Local monitoring databases
-* Python cache files
+The project was developed collaboratively. My work focused primarily on financial and economic integration; statistical, temporal, and comparative analysis; analytical validation and reproducibility; and integration and operational testing of the monitoring stack.
 
-The portfolio repository should therefore contain source code and reproducible configuration templates rather than local execution state.
+Other modules and design decisions were collaborative, and responsibility changed during development. See [ATTRIBUTION.md](ATTRIBUTION.md) for contributor credit without inferring module ownership from this snapshot's clean Git history.
 
----
+## Portfolio
 
-## Project Context
-
-The original project investigates public opinion using multi-platform social-media data and was built as a collaborative analytical pipeline.
-
-The architecture was intentionally designed to be reusable: topics, search terms, source registries, and collection parameters can be changed without redesigning the complete pipeline.
-
----
-
-## Author / Portfolio
-
-**Ali Behroozi**
-
-Data Scientist | Transportation & Mobility Analytics | Machine Learning | Simulation | Data Engineering
-
-* GitHub: `@alibehroozi43`
-* LinkedIn: Ali Behroozi
-* Research interests: Machine Learning, Graph Neural Networks, Reinforcement Learning, Transportation Analytics, Data Engineering, Simulation
-
----
-
-## Attribution
-
-This repository represents collaborative project work.
-
-Detailed collaboration credit is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md). This clean portfolio snapshot is intended to demonstrate my technical contributions and experience working within a larger data-science and software-engineering workflow without reproducing the original repository history.
+Ali Behroozi — data science, transportation and mobility analytics, machine learning, simulation, and data engineering. GitHub: [@alibehroozi43](https://github.com/alibehroozi43)

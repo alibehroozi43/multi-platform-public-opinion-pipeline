@@ -1,11 +1,7 @@
-"""
-schema.py — unified data format definition for the whole team
----------------------------------------------------------------
-This file is the single source of truth for the data format.
-Idea by Yasaman; implemented and maintained by Parmida — everyone else just imports from it.
-If a field needs to change, coordinate with the team first.
+"""Shared record types emitted by platform collectors.
 
-Version: v3 - Day 4 (see docs/decision_log.md for the v2/v3 additive changes)
+The schema was initiated by Yasaman Shekofteh and developed collaboratively,
+including implementation and maintenance by Parmida Mohamadzade.
 """
 
 from dataclasses import dataclass, field, asdict
@@ -16,24 +12,16 @@ import json
 @dataclass
 class AuthorMetadata:
     author_display_name: Optional[str] = None
-    author_channel_id: Optional[str] = None   # or user_id, depending on the platform
+    author_channel_id: Optional[str] = None
     like_count: int = 0
-    follower_count: Optional[int] = None      # if the platform provides it (e.g. Reddit/Telegram)
-    account_age_days: Optional[int] = None    # for bot filtering later (Ali/Reyhaneh)
+    follower_count: Optional[int] = None
+    account_age_days: Optional[int] = None
 
-    # v2 (Day 3+, Parmida) - see docs/decision_log.md. Salted hash of a stable
-    # author identifier, for collectors that must not store raw usernames
-    # (project brief section 10/43: no unnecessary PII). Prefer this over
-    # author_display_name in new collectors; the latter stays for backward
-    # compatibility with data already collected under v1.
+    # Prefer a salted stable identifier to raw usernames. Display names remain
+    # optional for compatibility with records collected under the earlier schema.
     author_hash: Optional[str] = None
 
-    # v4 (Day 5, Parmida) - docs/raw_schema_v05.md §5 defines this alongside
-    # author_hash but it was never added to Record when the v2 author_hash
-    # field went in. One of: available/deleted/unavailable/not_provided.
-    # Lets a collector record *why* author_hash is None (e.g. Reddit's
-    # "[deleted]"/"[removed]" authors have no stable id to hash) instead of
-    # that case being indistinguishable from "collector forgot to hash it".
+    # One of: available, deleted, unavailable, not_provided.
     author_id_status: Optional[str] = None
 
 
@@ -53,12 +41,7 @@ class Record:
     reply_count: int = 0
     is_reply: bool = False
 
-    # v2 (Day 3+, Parmida) - additive fields to close gaps against the project
-    # brief's raw-data contract (section 10), Collection Manifest (11),
-    # automation risk (16), and geo (17). All optional with defaults so
-    # existing v1 producers/consumers of Record are unaffected. See
-    # docs/decision_log.md for why these were added and coordinate with
-    # the team before renaming/removing anything above this line.
+    # Optional defaults preserve compatibility with earlier collector outputs.
     content_id: Optional[str] = None       # platform's own id for this exact piece of content (e.g. comment id) - required for dedup/uniqueness checks
     parent_id: Optional[str] = None        # content_id of the parent, when is_reply is True
     collected_at_utc: Optional[str] = None # when THIS pipeline fetched the record, distinct from `date` (when it was posted)
@@ -79,12 +62,7 @@ class Record:
     # Heuristic risk score in [0, 1], not a bot verdict - see automation_risk.py.
     automation_risk_score: Optional[float] = None
 
-    # v3 (Day 4+, Parmida) - additive fields to match docs/raw_schema_v03.md
-    # (the team's raw-data export contract) and docs/source_registry_v3.md
-    # (the allowed-sources list). See docs/decision_log.md for the full
-    # rationale. All optional with defaults so existing producers/consumers
-    # of Record are unaffected. Coordinate with the team before renaming/
-    # removing anything above this line, same as the v2 block.
+    # Provenance and sampling fields follow docs/raw_schema_v03.md.
     content_type: Optional[str] = None        # "comment" | "reply" | ... - raw_schema_v03 §8
     matched_query_ids: Optional[str] = None    # ";"-joined query_ids that discovered this content's video (raw_schema_v03 §3)
     query_version: Optional[str] = None        # query_registry.yaml's registry_version at collection time
@@ -103,12 +81,8 @@ class Record:
     in_window: Optional[bool] = None
     is_partial_week: Optional[bool] = None
 
-    # v4 (Day 5, Parmida) - raw_schema_columns.py already lists content_status
-    # (§6) as part of the shared export contract; Record never had a matching
-    # field. One of: active/deleted/removed/unknown. "[deleted]"/"[removed]"
-    # text is not valid opinion content (docs/legacy_data_intake_and_
-    # harmonization_plan_v1.md §8, Reddit rules) - this lets downstream steps
-    # filter on it explicitly instead of string-matching text_raw themselves.
+    # One of: active, deleted, removed, unknown. Deleted/removed content is
+    # excluded downstream without matching display text.
     content_status: Optional[str] = None
 
     def to_json_line(self) -> str:
@@ -117,13 +91,12 @@ class Record:
 
 
 def validate_record(d: Dict[str, Any]) -> bool:
-    """Quick check before saving - prevents incomplete data from entering the pipeline."""
+    """Return whether all required record fields are populated."""
     required = ["text", "date", "source", "platform"]
     return all(k in d and d[k] not in (None, "") for k in required)
 
 
 if __name__ == "__main__":
-    # usage example
     r = Record(
         text="sample comment text",
         date="2026-03-05T12:00:00Z",
