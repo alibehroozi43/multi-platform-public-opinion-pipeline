@@ -1,0 +1,104 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+_env
+*.key
+credentials.json
+client_secret*.json
+
+# Data Tracking & Exclusions
+data/raw/*
+data/processed/*
+data/interim/*
+*.jsonl
+*.csv
+
+# Allow version-controlled documentation templates
+!docs/collection_coverage_template.csv
+!docs/data_handoff_manifest_template.csv
+!docs/query_execution_audit_template.csv
+!docs/schema_mapping_template.csv
+
+# Provenance & Audit Deliverables
+!docs/data_handoff_manifest.csv
+!docs/collection_coverage.csv
+!docs/query_execution_audit.csv
+!data/annotated/gold_sample_replacement_delta_2026-08-14.csv
+
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+!**/sample_*.csv
+!**/sample_*.jsonl
+
+# Python Virtual Environments & Builds
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+.venv/
+.venv312/
+venv/
+env/
+*.egg-info/
+.deps_ready
+
+# Outputs & Reports
+outputs/*
+!outputs/.gitkeep
+!outputs/figures/
+!outputs/figures/.gitkeep
+!outputs/tables/
+!outputs/tables/.gitkeep
+!outputs/audits/
+!outputs/audits/.gitkeep
+!outputs/model_evaluation/
+!outputs/model_evaluation/.gitkeep
+.ipynb_checkpoints/
+
+# Raw Original Platform Data
+data/raw_original/x/
+data/raw_original/reddit/
+data/raw_original/youtube/
+data/raw_original/financial/
+
+# Frozen Financial Inputs
+!data/interim/financial/
+!data/interim/financial/frozen_inputs/
+!data/interim/financial/frozen_inputs/*.csv
+
+# Financial Tables & Audits
+!outputs/tables/financial/
+!outputs/tables/financial/*.csv
+!outputs/audits/financial/
+!outputs/audits/financial/*.csv
+!outputs/audits/financial/*.txt
+
+# Monitoring, Docker, Prometheus & Grafana
+monitoring/.venv/
+monitoring/.deps_ready
+monitoring/grafana/data/
+monitoring/prometheus/data/
+monitoring/*.log
+group_pipeline_health.json
+group_pipeline_metrics.txt
+
+# Backups & Temp
+data_backup/
+.claude/settings.local.json
+
+# IDE & OS
+.DS_Store
+.vscode/
+.idea/
+
+checklist_execution_prompts.md
+outputs_guide_fa.md
+README_TEAM_ORIGINAL.md
+
+# Runtime monitoring artifacts
+monitoring/logs/
+monitoring/state/
+*.log
+*.db

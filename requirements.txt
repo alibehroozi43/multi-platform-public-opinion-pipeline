@@ -1,0 +1,16 @@
+python-dotenv
+google-api-python-client
+google-generativeai
+groq
+requests
+pandas
+numpy
+scipy
+statsmodels
+yfinance
+pyarrow
+jdatetime
+pyyaml
+selenium
+webdriver-manager
+datasketch

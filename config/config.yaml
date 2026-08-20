@@ -1,0 +1,153 @@
+# config.yaml — single source of truth for "which topic is this pipeline run about"
+# Per roadmap_pipeline.md: nothing topic-specific should be hardcoded in the
+# extraction/classification/analysis code — it should all be read from here.
+# To point the whole pipeline at a new topic, edit this file only.
+
+topic: "جنگ ایران و آمریکا"
+topic_id: "iran_us_war"   # ascii slug — used in output paths; change this when the topic changes
+
+keywords_fa: ["جنگ ایران آمریکا"]
+keywords_en: ["Iran US war", "Iran America conflict news"]
+# keywords_ar removed per docs/source_registry_v3.md SR-006: the project's
+# language domain is EN + FA only, Arabic is explicitly "Archived - out of
+# scope" (§4-2). query_registry.yaml's ar_* entries are left in place
+# (untouched, per that file's own "don't silently edit" rule) but filtered
+# out at load time in youtube_extract.py.
+
+date_range:
+  start: "2026-02-28"   # 9 Esfand 1404
+  end: "2026-07-22"     # 31 Tir 1405; fixed analytical window
+  # NOTE: this only bounds live collection ("how far do we keep fetching new
+  # comments"). The project's analytical window end used for
+  # project_week/in_window (fixed at 2026-07-22T23:59:59Z per
+  # docs/raw_schema_v03.md §10 and docs/source_registry_v3.md §4-1) lives in
+  # src/ingestion/project_calendar.py, independent of this "auto" setting -
+  # see raw_schema_v03.md §10-1 "Window Lock". search.list calls also pass
+  # this fixed END as publishedBefore directly (source_registry_v3.md §4-1).
+
+# Documentational/forward-looking only: no orchestrator currently reads this
+# field to enable/disable per-platform collection, so it's safe to list a
+# platform here before it has a live conditional switch. Reddit is included
+# because it now emits Record via config/schema.py too (reddit_to_record.py,
+# per docs/decision_log.md 2026-08-12). X is included now that
+# feature/twitter-files has been merged in (2026-08-13).
+platforms: ["youtube", "reddit", "x"]
+
+# 31 Tir 1405; fixed analytical window
+youtube:
+  regions:              # [regionCode, relevanceLanguage] pairs applied to the
+                         # generic keyword search, for source diversity beyond
+                         # the curated channel list below
+    - ["IR", "fa"]
+    - ["US", "en"]
+    - ["GB", "en"]
+    - ["DE", "de"]
+    - ["FR", "fr"]
+    # ["AE", "ar"] removed per docs/source_registry_v3.md SR-006 (Arabic is
+    # out of scope for this project's language domain, EN + FA only).
+  max_videos_per_query: 25
+  max_comments_per_video: 300
+  explicit_video_ids: ["bQI8B93CnJg"]
+  channel_search_query: "Iran US conflict"
+
+  # Curated, topic-specific outlet list — verified at runtime against each
+  # channel's own customUrl (src/ingestion/youtube_extract.find_channel_id), so
+  # a wrong handle just logs a warning and gets skipped rather than
+  # silently pulling in the wrong channel.
+  #
+  # This list is the 15 "Active" channels from docs/source_registry_v3.md §4
+  # (replaces the earlier hand-picked 18-channel list — see
+  # docs/decision_log.md). Each entry carries the Source Registry's
+  # source_id so it can be written straight onto Record.source_id. Handles
+  # for the 7 channels new to this list (source_registry_v3.md's own §9
+  # checklist item 2 flags these as still needing manual verification) are
+  # best-effort guesses — a wrong handle just logs a warning and is skipped
+  # (find_channel_id), it doesn't break the run.
+  #
+  # Deliberately DROPPED vs the previous list: Press TV / IRIB News (Iran
+  # state media - not in source_registry_v3's active set), NYT, CBS News,
+  # Sky News, France 24, euronews, RFI, CSIS, DW News (the English DW
+  # channel - source_registry_v3 lists DW **Persian** instead).
+  channels:
+    wire:
+      - {name: "Reuters", handle: "reuters", country: "GB", source_id: "YT-001"}
+      - {name: "Associated Press", handle: "AP", country: "US", source_id: "YT-002"}
+    us_partisan:
+      - {name: "CNN", handle: "cnn", country: "US", source_id: "YT-009"}
+      - {name: "Fox News", handle: "FoxNews", country: "US", source_id: "YT-013"}
+    international:
+      - {name: "BBC News", handle: "bbcnews", country: "GB", source_id: "YT-003"}
+      - {name: "Al Jazeera English", handle: "aljazeeraenglish", country: "QA", source_id: "YT-004"}
+      - {name: "Middle East Eye", handle: "middleeasteye", country: "GB", source_id: "YT-024"}
+    non_western:
+      - {name: "TRT World", handle: "trtworld", country: "TR", source_id: "YT-018"}
+      - {name: "WION", handle: "WIONews", country: "IN", source_id: "YT-022"}
+    financial:
+      - {name: "Bloomberg Television", handle: "BloombergTelevision", country: "US", source_id: "YT-015"}
+    regional_gulf:
+      - {name: "Al Arabiya English", handle: "alarabiya", country: "AE", source_id: "YT-026"}
+    persian:
+      - {name: "BBC Persian", handle: "bbcnewspersian", country: "GB", source_id: "YT-029"}
+      - {name: "Iran International", handle: "iranintl", country: "GB", source_id: "YT-030"}
+      - {name: "VOA Farsi", handle: "voafarsi", country: "US", source_id: "YT-031"}
+      - {name: "DW Persian", handle: "dwpersian", country: "DE", source_id: "YT-034"}
+
+  # Discovery priority order — checkpoint.py resumability means this alone
+  # determines what gets covered first across multiple runs/days, no
+  # separate "day N" bookkeeping needed. Categories not listed here are
+  # still covered, just after these. Persian + wire prioritized first per
+  # source_registry_v3.md's "priority to Persian channels, then by volume"
+  # note on its reserve/archive ordering (§4-2).
+  channel_priority_order:
+    - persian
+    - wire
+    - us_partisan
+    - international
+    - non_western
+    - financial
+    - regional_gulf
+
+  x:
+    collector_version: "x-selenium-v4.5"
+    query_version: "v3.0"
+    sort_mode: "live"
+
+    max_workers: 3
+    max_scrolls_per_slice: 4
+    max_scrolls_min_day: 9
+    no_new_scroll_limit: 2
+
+    slice_split:
+      last_scroll_new_threshold: 4
+      total_seen_threshold: 45
+      minimum_slice_days: 1
+
+    navigation:
+      page_load_timeout_seconds: 45
+      ready_timeout_seconds: 28
+      startup_stagger_seconds: 8
+      startup_max_attempts: 3
+      startup_retry_seconds: 12
+      scroll_min_delay_seconds: 1.8
+      scroll_max_delay_seconds: 3.8
+      job_backoff_seconds: 30
+      max_job_attempts: 3
+
+    backfill:
+      min_delay_seconds: 3.0
+      max_delay_seconds: 6.0
+      ready_timeout_seconds: 20
+
+    persistence:
+      operational_target: 30000
+      dashboard_refresh_seconds: 2.0
+      backup_interval_seconds: 600
+      recovery_fsync_every: 1
+
+    runtime:
+      accounts_env_var: "X_ACCOUNTS_JSON"
+      author_salt_env_var: "PROJECT_AUTHOR_SALT"
+      output_root_env_var: "X_OUTPUT_ROOT"
+      default_local_output_root: "./Twitter_Scraper_Data_v4"
+      default_colab_output_root: "/content/drive/MyDrive/Twitter_Scraper_Data_v4"
+      salt_filename: "project_author_salt.txt"
