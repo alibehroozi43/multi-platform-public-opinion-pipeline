@@ -42,6 +42,19 @@ The analytical workflow includes:
 
 Automation-risk scores are review signals, not definitive bot classifications. Event and financial results are treated as temporal associations rather than causal effects.
 
+## Data Sources and External Services
+
+- **YouTube:** collection uses the **YouTube Data API v3**. The project API key is provisioned through **Google Cloud Console** and supplied at runtime through the `YOUTUBE_API_KEY` environment variable; credentials are never committed to the repository.
+- **Global financial markets:** global market series are collected primarily from **Yahoo Finance** through the `yfinance` workflow. The financial registry covers foreign exchange, crude oil, gold, equity indices, volatility measures, Treasury yields, shipping-related equities, ETFs, and crypto assets. Selected series are also cross-checked against the FRED REST API as an external verification source.
+
+## Pipeline Architecture Map
+
+A detailed interactive map of the end-to-end workflow—from raw data ingestion and harmonization through eligibility, normalization, annotation, statistical analysis, event studies, financial alignment, and final outputs—is available here:
+
+[**Open the interactive pipeline architecture map**](https://claude.ai/code/artifact/2257fb34-8166-4fa0-836b-24873bbcd56c)
+
+The map also distinguishes optional execution paths such as live ingestion, profiling, financial-data preparation, notebook execution, and the human-reviewed Gold Sample workflow.
+
 ## Monitoring and Control Center
 
 The `monitoring/` application provides process controls, live logs, read-only data summaries, runtime metrics, and pipeline-integrity checks. Platform-specific Grafana dashboards cover Reddit, X, YouTube, finance, and overall status. VictoriaMetrics stores scraped metrics, and Docker Compose provisions the monitoring services.
