@@ -49,7 +49,9 @@ Automation-risk scores are review signals, not definitive bot classifications. E
 
 ## Pipeline Architecture Map
 
-A detailed interactive map of the end-to-end workflow—from raw data ingestion and harmonization through eligibility, normalization, annotation, statistical analysis, event studies, financial alignment, and final outputs—is available here:
+A detailed map of the end-to-end workflow—from raw data ingestion and harmonization through eligibility, normalization, annotation, statistical analysis, event studies, financial alignment, and final outputs—is shown below.
+
+[![End-to-end pipeline architecture](docs/images/pipeline_architecture.jpg)](https://claude.ai/code/artifact/2257fb34-8166-4fa0-836b-24873bbcd56c)
 
 [**Open the interactive pipeline architecture map**](https://claude.ai/code/artifact/2257fb34-8166-4fa0-836b-24873bbcd56c)
 
