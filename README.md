@@ -51,7 +51,7 @@ Automation-risk scores are review signals, not definitive bot classifications. E
 
 A detailed map of the end-to-end workflow—from raw data ingestion and harmonization through eligibility, normalization, annotation, statistical analysis, event studies, financial alignment, and final outputs—is shown below.
 
-![End-to-end pipeline architecture](docs/images/pipeline_architecture.jpg)
+<img src="https://raw.githubusercontent.com/alibehroozi43/multi-platform-public-opinion-pipeline/main/docs/images/pipeline_architecture.jpg" alt="End-to-end pipeline architecture" width="100%">
 
 The map also distinguishes optional execution paths such as live ingestion, profiling, financial-data preparation, notebook execution, and the human-reviewed Gold Sample workflow.
 
